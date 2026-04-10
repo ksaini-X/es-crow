@@ -16,7 +16,7 @@ export default function BeneficiaryPage() {
 
   return (
     <div className="bg-background font-mono text-foreground p-4">
-      <main className="max-w-4xl mx-auto space-y-10">
+      <main className="max-w-6xl mx-auto space-y-10">
         {/* Header Metadata */}
         <div className="border-b-2 border-foreground/20 pb-4 flex justify-between items-end">
           <div>

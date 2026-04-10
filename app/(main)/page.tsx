@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Landing() {
   return (
-    <section className="relative flex items-center justify-center bg-background">
+    <section className="relative flex items-center justify-center bg-background pt-5">
       <div className="relative z-10 max-w-5xl w-full border-2 border-foreground p-6 md:p-12 bg-background shadow-[12px_12px_0px_0px_rgba(139,115,85,0.3)]">
         <div className="space-y-2">
           <h1 className="text-5xl md:text-8xl font-black uppercase leading-[0.9] tracking-tighter">
@@ -14,7 +14,6 @@ export default function Landing() {
               Payments.
             </span>
           </h1>
-          {/* Body Text as a "Clause" */}
           <div className="max-w-xl space-y-4">
             <p className="text-lg md:text-xl font-medium leading-tight">
               A minimalist escrow architecture. Funds are programmatically

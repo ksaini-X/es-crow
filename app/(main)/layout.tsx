@@ -17,7 +17,7 @@ export default function Mainlayput({
         <WalletModalProvider>
           <div className="max-w-6xl mx-auto flex flex-col min-h-screen relative">
             <Appbar />
-            <main className="pt-10">{children}</main>
+            <main className="pt-5">{children}</main>
           </div>
         </WalletModalProvider>
       </WalletProvider>

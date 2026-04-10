@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Calendar, DollarSign, FileText } from "lucide-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import useProgram from "@/hooks/useProgram";
+import { PublicKey } from "@solana/web3.js";
+import * as anchor from "@coral-xyz/anchor";
 
 export default function UserPage() {
   const [showForm, setShowForm] = useState(false);
+  const wallet = useWallet();
+  const program = useProgram();
+  const [receiver, setReceiver] = useState<null | string>(null);
   const [milestones, setMilestones] = useState([
     { title: "", description: "", amount: "", endDate: "" },
   ]);
@@ -22,10 +29,45 @@ export default function UserPage() {
     setMilestones(milestones.filter((_, i) => i !== index));
   };
 
+  function handleMilestoneInput(
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    idx: number,
+  ) {
+    const { name, value } = e.target;
+
+    setMilestones((prevMilestones) =>
+      prevMilestones.map((milestone, i) =>
+        i === idx ? { ...milestone, [name]: value } : milestone,
+      ),
+    );
+  }
+
+  console.log(milestones);
+  async function handleCreateEscrow() {
+    if (!wallet.publicKey || !receiver) return;
+    const receiverPubkey = new PublicKey(receiver);
+    if (!receiverPubkey) return;
+    const id = new anchor.BN(Math.ceil(Math.random() * 10000000));
+    let amount = 0;
+    milestones.forEach((m) => {
+      amount += Number(m.amount);
+    });
+    console.log(amount);
+    try {
+      let sig = await program.methods
+        .initEscrow(receiverPubkey, new anchor.BN(amount), id)
+        .accounts({
+          creator: wallet.publicKey,
+        })
+        .rpc();
+      console.log(sig);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
     <div className=" bg-background font-mono text-foreground p-4">
-      <main className="max-w-4xl mx-auto space-y-12">
-        {/* Header Metadata */}
+      <main className="max-w-6xl mx-auto space-y-12">
         <div className="border-b-2 border-foreground/20 pb-4 flex justify-between items-end">
           <div>
             <h2 className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
@@ -53,7 +95,6 @@ export default function UserPage() {
             </div>
 
             <div className="space-y-8">
-              {/* Core Escrow Data */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase flex items-center gap-2">
@@ -62,22 +103,14 @@ export default function UserPage() {
                   </label>
                   <Input
                     placeholder="Enter Solana Address..."
+                    onChange={(e) => {
+                      setReceiver(e.target.value);
+                    }}
                     className="rounded-none border-2 border-foreground bg-background focus-visible:ring-0"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase flex items-center gap-2">
-                    <span className="w-2 h-2 bg-accent" /> Escrow ID (u64)
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 101"
-                    className="rounded-none border-2 border-foreground bg-background"
                   />
                 </div>
               </div>
 
-              {/* Dynamic Milestones Section */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h4 className="text-sm font-black uppercase tracking-widest">
@@ -100,6 +133,9 @@ export default function UserPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pl-4">
                       <div className="md:col-span-2">
                         <Input
+                          maxLength={20}
+                          name="title"
+                          onChange={(e) => handleMilestoneInput(e, idx)}
                           placeholder="Milestone Title (max 20 chars)"
                           className="rounded-none border-b-2 border-x-0 border-t-0 border-foreground bg-transparent px-0"
                         />
@@ -108,7 +144,10 @@ export default function UserPage() {
                         <div className="relative">
                           <DollarSign className="absolute left-2 top-2.5 w-4 h-4 opacity-50" />
                           <Input
+                            onChange={(e) => handleMilestoneInput(e, idx)}
                             placeholder="Amount (SOL)"
+                            name="amount"
+                            type="number"
                             className="pl-8 rounded-none border-2 border-foreground bg-background"
                           />
                         </div>
@@ -120,6 +159,9 @@ export default function UserPage() {
                         <textarea
                           placeholder="Description (max 50 chars)"
                           rows={1}
+                          name="description"
+                          onChange={(e) => handleMilestoneInput(e, idx)}
+                          maxLength={50}
                           className="w-full bg-transparent border-b-2 border-foreground p-1 text-sm focus:outline-none"
                         />
                       </div>
@@ -127,6 +169,8 @@ export default function UserPage() {
                         <Calendar className="absolute left-2 top-2.5 w-4 h-4 opacity-50" />
                         <Input
                           type="date"
+                          name="date"
+                          onChange={(e) => handleMilestoneInput(e, idx)}
                           className="pl-8 rounded-none border-2 border-foreground bg-background"
                         />
                       </div>
@@ -152,14 +196,16 @@ export default function UserPage() {
                 </Button>
               </div>
 
-              <Button className="w-full h-16 bg-foreground text-background font-black text-lg rounded-none hover:bg-accent hover:text-accent-foreground transition-colors shadow-[4px_4px_0px_0px_rgba(139,115,85,1)]">
+              <Button
+                className="w-full h-16 bg-foreground text-background font-black text-lg rounded-none hover:bg-accent hover:text-accent-foreground transition-colors shadow-[4px_4px_0px_0px_rgba(139,115,85,1)]"
+                onClick={handleCreateEscrow}
+              >
                 LOCK_FUNDS_AND_INITIALIZE_PDA
               </Button>
             </div>
           </section>
         )}
 
-        {/* Active Escrow Display - Matches Escrow Account Structure */}
         <section className="space-y-6">
           <h3 className="text-xl font-black uppercase inline-block border-b-4 border-accent">
             Active_Protocols
@@ -174,7 +220,6 @@ export default function UserPage() {
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Account State Summary */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div className="border-r border-foreground/10 last:border-0">
                   <p className="text-[10px] text-muted-foreground uppercase">
@@ -202,7 +247,6 @@ export default function UserPage() {
                 </div>
               </div>
 
-              {/* Milestone Tracking List */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
                   <FileText className="w-3 h-3" /> Execution Sequence
