@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("4GBQt8KLH1Qhsfxa4J8s4EQSPFgKy17jk2oxgUWoUszb");
+declare_id!("EkeukHD4mGQ3buNej7wfdoWvc7a6tiyGruti1BZvDCRi");
 
 pub mod error;
 pub mod instructions;
@@ -15,9 +15,9 @@ pub mod escrow_program {
 
     pub fn init_escrow(
         ctx: Context<InitEscrow>,
+        id: u64,
         receiver: Pubkey,
         total_amount: u64,
-        id: u64,
     ) -> Result<()> {
         msg!("Greetings from: {:?}", ctx.program_id);
 

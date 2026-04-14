@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use crate::state::Escrow;
 
 #[derive(Accounts)]
-#[instruction(receiver:Pubkey, id:u64)]
+#[instruction(id:u64)]
 pub struct InitEscrow<'info> {
     #[account(mut)]
     pub creator: Signer<'info>, 
@@ -10,8 +10,7 @@ pub struct InitEscrow<'info> {
         init, 
         payer = creator, 
         space = 8 + Escrow::INIT_SPACE, 
-        seeds  = [b"escrow", creator.key().as_ref(), 
-        &id.to_le_bytes()], 
+        seeds  = [b"escrow", creator.key().as_ref(), &id.to_le_bytes()], 
         bump
     )]
     pub escrow : Account<'info, Escrow>, 

@@ -4,13 +4,13 @@ import { EscrowProgram } from "../target/types/escrow_program";
 
 describe("escrow-program", () => {
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const program = anchor.workspace.escrowProgram as Program<EscrowProgram>;
 
   it("Is initialized!", async () => {
+    console.log(program);
     // Add your test here.
-    const tx = await program.methods.initialize().rpc();
-    console.log("Your transaction signature", tx);
   });
 });

@@ -8,6 +8,8 @@ import {
 import idl from "@/escrow-program/target/idl/escrow_program.json";
 import { EscrowProgram } from "@/escrow-program/target/types/escrow_program";
 import { useMemo } from "react";
+import { PublicKey } from "@solana/web3.js";
+
 export default function useProgram() {
   const wallet = useWallet() as AnchorWallet;
   const { connection } = useConnection();
@@ -19,5 +21,5 @@ export default function useProgram() {
     );
     return program;
   }, [connection, wallet]);
-  return program;
+  return { program, PROGRAM_ID: new PublicKey(idl.address) };
 }
